@@ -18,7 +18,8 @@ def focus_timer(minutes):
         log_file.write(f"Session completed: {minutes} minutes at {datetime.now()}\n")
                         
 if __name__ == "__main__":
-    
+
+    # User Input
     try:
         minutes = int(input("Enter focus session length in minutes: "))
         focus_timer(minutes)
