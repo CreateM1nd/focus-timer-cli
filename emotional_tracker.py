@@ -1,5 +1,8 @@
-from collections import Counter
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
+
+import os
+os.system('cli')
 
 def log_emotion():
     print("\n--- Emotion Logger ---" )
@@ -127,6 +130,43 @@ def summary_this_week():
     except FileNotFoundError:
         print("No emotion log found.")
         
+def emotion_weekly_timeline():
+    try:
+        daily_emotions = defaultdict(list)
+        today = datetime.now().date()
+        one_week_ago = today - timedelta(days=6)  # last 7 days including today
+
+        with open("emotion_log.txt", "r") as file:
+            for line in file:
+                parts = line.strip().split(" | ")
+                if len(parts) >= 2:
+                    timestamp_str = parts[0].strip()
+                    emotion = parts[1].strip().capitalize()
+
+                    try:
+                        timestamp = datetime.strptime(timestamp_str, "%Y-%m-%d %H:%M")
+                        if one_week_ago <= timestamp.date() <= today:
+                            date_key = timestamp.date().strftime("%a %d")
+                            daily_emotions[date_key].append(emotion)
+                    except ValueError:
+                        continue
+
+        if daily_emotions:
+            print("\n--- Weekly Emotion Timeline ---")
+            for date in sorted(daily_emotions.keys()):
+                counts = Counter(daily_emotions[date])
+                bar = ""
+                for emotion, count in counts.items():
+                    symbol = emotion[0].upper()  # first letter as marker
+                    bar += f"{symbol * count} "
+                print(f"{date:<10} | {bar}")
+            print("--------------------------------\n")
+        else:
+            print("No emotion data for the past 7 days.")
+
+    except FileNotFoundError:
+        print("No emotion log found.")
+        
 def emotion_ascii_graph():
     try:
         with open("emotion_log.txt", "r") as file:
@@ -170,9 +210,10 @@ def menu():
         print("2. Show full emotion summary")
         print("3. Show today’s emotion summary")
         print("4. Show this week’s emotion summary")
-        print("5. Exit")
+        print("5. Show Weekly Emotion Timeline")
         print("6. Show ASCII Emotion Graph (This Week)")
-        choice = input("Choose an option (1-5): ").strip()
+        print("7. Exit")
+        choice = input("Choose an option (1–7): ").strip()
 
         if choice == "1":
             log_emotion()
@@ -183,12 +224,14 @@ def menu():
         elif choice == "4":
             summary_this_week()
         elif choice == "5":
-            print("Exiting. Stay aware ✌")
+            emotion_weekly_timeline()
         elif choice == "6":
             emotion_ascii_graph()
+        elif choice == "7":
+            print("Exiting. Stay aware ✌")
             break
         else:
             print("Invalid choice. Try again.")
-
+            
 if __name__ == "__main__":
     menu()
