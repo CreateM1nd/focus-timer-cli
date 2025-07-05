@@ -1,37 +1,40 @@
 import time
 from datetime import datetime
 from collections import defaultdict
+from emotional_tracker import log_emotion
 import msvcrt
 
 def focus_timer(minutes):
-    seconds = minutes * 60
+    seconds = int(minutes * 60)
     print(f"Focus session started for {minutes} minutes.")
     print("Press [p] to pause, [r] to resume, [q] to quit.\n")
     
-    pause = False
-    start_time = time.time()
-    
+    paused = False
 
     while seconds > 0:
-        mins, secs = divmod(seconds, 60)
-        time.sleep(1)
-        seconds -= 1
+        if not paused:
+            mins, secs = divmod(seconds, 60)
+            print(f"\rTime Remaining: {mins:02d}:{secs:02d}", end="")
+            time.sleep(1)
+            seconds -= 1
+        else:
+            print("\r[Paused] Press [r] to resume or [q] to quit.", end="")
+            time.sleep(1)
 
-# Keypress check
+        # Check for keypress
+        if msvcrt.kbhit():
+            key = msvcrt.getwch().lower()
+            if key == 'p':
+                paused = True
+                print("\nPaused.")
+            elif key == 'r' and paused:
+                paused = False
+                print("\nResumed.")
+            elif key == 'q':
+                print("\n[Session cancelled by user.]")
+                return
 
-    if msvcrt.kbhit():
-        key = msvcrt.getwch().lower()
-        if key == 'p':
-            paused = True
-            print("\n[Paused] Press [r] to resume or [q] to quit.")
-        elif key == 'r' and paused:
-            paused = False
-            print("[Resumed]")
-        elif key == 'q':
-            print("\n[Session cancelled by user.]")
-            return # exit the function immediately
-        
-    print("Time's up! Great job!")
+    print("\nTime's up! Great job!")
 
     # Session Logging
     with open("session_log.txt", "a") as log_file:
@@ -100,7 +103,9 @@ if __name__ == "__main__":
         minutes = float(input("Enter focus session length in minutes: "))
         focus_timer(minutes)
         show_today_summary()
-        visualize_sessions_ascii()
-
+        
+        print("\nReflect on that session:")
+        log_emotion()
+        
     except ValueError:
         print("Please enter a valid number.")
