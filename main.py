@@ -1,16 +1,36 @@
 import time
 from datetime import datetime
 from collections import defaultdict
+import msvcrt
 
 def focus_timer(minutes):
     seconds = minutes * 60
     print(f"Focus session started for {minutes} minutes.")
+    print("Press [p] to pause, [r] to resume, [q] to quit.\n")
+    
+    pause = False
+    start_time = time.time()
+    
 
     while seconds > 0:
         mins, secs = divmod(seconds, 60)
         time.sleep(1)
         seconds -= 1
 
+# Keypress check
+
+    if msvcrt.kbhit():
+        key = msvcrt.getwch().lower()
+        if key == 'p':
+            paused = True
+            print("\n[Paused] Press [r] to resume or [q] to quit.")
+        elif key == 'r' and paused:
+            paused = False
+            print("[Resumed]")
+        elif key == 'q':
+            print("\n[Session cancelled by user.]")
+            return # exit the function immediately
+        
     print("Time's up! Great job!")
 
     # Session Logging
