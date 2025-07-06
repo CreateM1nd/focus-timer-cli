@@ -2,7 +2,6 @@ from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 
 import os
-os.system('cli')
 
 def log_emotion():
     print("\n--- Emotion Logger ---" )
